@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Typing Tutor - 프리미엄 타자 연습기</title>
+  <!-- Google Fonts: Outfit for modern look, Noto Sans KR for Korean typing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons for premium feel -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <i data-lucide="keyboard" class="logo-icon"></i>
+        <span>Antigravity <span class="accent-text">Typing</span></span>
+      </div>
+      
+      <div class="settings-group">
+        <!-- Language Switcher -->
+        <div class="toggle-control" id="langToggle">
+          <button class="active" data-lang="ko">한글</button>
+          <button data-lang="en">English</button>
+        </div>
+
+        <!-- Sound Config -->
+        <div class="select-wrapper">
+          <i data-lucide="volume-2" class="select-icon"></i>
+          <select id="soundSelect">
+            <option value="clicky">청축 (Clicky)</option>
+            <option value="tactile" selected>갈축 (Tactile)</option>
+            <option value="linear">적축 (Linear)</option>
+            <option value="mute">음소거 (Mute)</option>
+          </select>
+        </div>
+
+        <!-- Finger Guide Toggle -->
+        <button id="fingerGuideToggleBtn" class="icon-btn" title="운지법 가이드 토글">
+          <i data-lucide="hand"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="icon-btn" title="테마 변경">
+          <i data-lucide="sun" class="theme-icon-light"></i>
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation / Mode Tabs -->
+    <nav class="mode-tabs">
+      <button class="tab-btn active" data-mode="key">
+        <i data-lucide="grid"></i>
+        <span>자리 연습</span>
+      </button>
+      <button class="tab-btn" data-mode="word">
+        <i data-lucide="type"></i>
+        <span>단어 연습</span>
+      </button>
+      <button class="tab-btn" data-mode="sentence">
+        <i data-lucide="align-left"></i>
+        <span>문장 연습</span>
+      </button>
+      <button class="tab-btn" data-mode="custom">
+        <i data-lucide="edit-3"></i>
+        <span>커스텀 연습</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Sub-options for Key/Word/Sentence practices (e.g., Home Row, Short Sentence, Code) -->
+      <div class="sub-nav" id="subNavContainer">
+        <!-- Dynamic Sub-navigation injected here -->
+      </div>
+
+      <!-- Practice Arena -->
+      <section class="practice-card">
+        <!-- Live Statistics -->
+        <div class="stats-bar">
+          <div class="stat-item">
+            <span class="stat-label">진행률</span>
+            <div class="stat-progress-container">
+              <div class="stat-progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <span class="stat-value" id="progressVal">0%</span>
+          </div>
+          <div class="stat-item-group">
+            <div class="stat-item">
+              <i data-lucide="zap" class="stat-icon speed-icon"></i>
+              <div>
+                <span class="stat-label" id="speedLabel">현재 타수</span>
+                <span class="stat-value" id="currentSpeed">0 <span class="unit">CPM</span></span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <i data-lucide="target" class="stat-icon accuracy-icon"></i>
+              <div>
+                <span class="stat-label">정확도</span>
+                <span class="stat-value" id="accuracy">100<span class="unit">%</span></span>
+              </div>
+            </div>
+            <div class="stat-item" id="timerStat" style="display: none;">
+              <i data-lucide="clock" class="stat-icon time-icon"></i>
+              <div>
+                <span class="stat-label">남은 시간</span>
+                <span class="stat-value" id="timeLeft">60<span class="unit">초</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Input Config (Visible only in Custom mode) -->
+        <div id="customConfigArea" class="custom-config-area" style="display: none;">
+          <textarea id="customTextArea" placeholder="여기에 연습하고 싶은 한글 또는 영어 텍스트를 입력하거나 붙여넣으세요..."></textarea>
+          <button id="startCustomBtn" class="btn primary-btn">연습 시작</button>
+        </div>
+
+        <!-- Text Typing Display Display -->
+        <div class="typing-display-box" id="typingDisplayBox">
+          <div class="display-lines-wrapper">
+            <div class="upcoming-text-container" id="textContainer">
+              <!-- Words or Sentences will be formatted and put here -->
+            </div>
+            <div class="user-input-display" id="inputDisplay">
+              <!-- Text typed by user in real time -->
+            </div>
+          </div>
+          <input type="text" id="hiddenInput" autocomplete="off" autofocus class="hidden-input">
+          <div class="input-focus-overlay" id="focusOverlay">
+            <i data-lucide="keyboard"></i>
+            <span>여기를 클릭하여 입력을 시작하세요</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Finger Guide Legend -->
+      <div class="finger-legend-container" id="fingerLegend" style="display: none;">
+        <div class="legend-title">손가락 운지법 가이드</div>
+        <div class="legend-hands">
+          <div class="hand-side left-hand">
+            <span class="finger-dot l-pinky">왼손 새끼</span>
+            <span class="finger-dot l-ring">왼손 약지</span>
+            <span class="finger-dot l-middle">왼손 중지</span>
+            <span class="finger-dot l-index">왼손 검지</span>
+          </div>
+          <div class="hand-side thumbs">
+            <span class="finger-dot thumb">양손 엄지 (Space)</span>
+          </div>
+          <div class="hand-side right-hand">
+            <span class="finger-dot r-index">오른손 검지</span>
+            <span class="finger-dot r-middle">오른손 중지</span>
+            <span class="finger-dot r-ring">오른손 약지</span>
+            <span class="finger-dot r-pinky">오른손 새끼</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual Keyboard Section -->
+      <section class="keyboard-section">
+        <div class="keyboard-container" id="keyboardContainer">
+          <!-- Virtual Keys injected dynamically via JS based on Layout (KO / EN) -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 Antigravity Typing Tutor. All rights reserved.</p>
+      <div class="shortcuts-guide">
+        <span><kbd>ESC</kbd> 처음부터 다시하기</span>
+        <span><kbd>Tab</kbd> 다음 연습</span>
+      </div>
+    </footer>
+
+    <!-- Result / Summary Modal -->
+    <div class="modal-overlay" id="resultModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">연습 완료! 🎉</h2>
+          <button class="close-btn" id="closeResultBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="result-summary-grid">
+            <div class="result-stat-card">
+              <div class="stat-card-icon speed-card"><i data-lucide="zap"></i></div>
+              <div class="stat-card-info">
+                <span class="card-label">평균 속도</span>
+                <span class="card-value" id="resultSpeed">0 <span class="unit">CPM</span></span>
+              </div>
+            </div>
+            <div class="result-stat-card">
+              <div class="stat-card-icon accuracy-card"><i data-lucide="target"></i></div>
+              <div class="stat-card-info">
+                <span class="card-label">정확도</span>
+                <span class="card-value" id="resultAccuracy">0<span class="unit">%</span></span>
+              </div>
+            </div>
+            <div class="result-stat-card">
+              <div class="stat-card-icon time-card"><i data-lucide="clock"></i></div>
+              <div class="stat-card-info">
+                <span class="card-label">총 소요 시간</span>
+                <span class="card-value" id="resultTime">0<span class="unit">초</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wrong Keys Analysis -->
+          <div class="error-keys-section">
+            <h3>자주 틀린 키 분석</h3>
+            <div id="errorKeysContainer" class="error-keys-container">
+              <!-- Dynamically populated bad keys -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="modalRetryBtn" class="btn secondary-btn"><i data-lucide="refresh-cw"></i> 다시 하기</button>
+          <button id="modalNextBtn" class="btn primary-btn"><i data-lucide="arrow-right"></i> 다음 단계</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
