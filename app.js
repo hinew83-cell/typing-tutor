@@ -78,8 +78,7 @@ function decomposeHangul(char) {
 const PRESETS = {
   ko: {
     key: [
-      { name: "기본 자리 - 자음", data: "ㅁㄴㅇㄹㅎ;" },
-      { name: "기본 자리 - 모음", data: "ㅗㅓㅏㅣ" },
+      { name: "기본 자리 (Home Row)", data: "ㅁㄴㅇㄹㅎㅗㅓㅏㅣ;" },
       { name: "왼손 자리 (Left Hand)", data: "ㅂㅈㄷㄱㅅㅁㄴㅇㄹㅋㅌㅊㅍ" },
       { name: "오른손 자리 (Right Hand)", data: "ㅛㅕㅑㅐㅔㅗㅓㅏㅣㅠㅜㅡ" },
       { name: "숫자 및 기호", data: "1234567890-=[]\\;',./" }
@@ -606,12 +605,29 @@ class TypingApp {
     if (this.currentMode !== 'custom') {
       const activePreset = PRESETS[this.currentLang][this.currentMode][this.subModeIndex];
       if (this.currentMode === 'key') {
-        // Build random sequences of keys
         const keys = activePreset.data;
         let randomDrills = "";
-        for (let i = 0; i < 40; i++) {
-          randomDrills += keys[Math.floor(Math.random() * keys.length)];
-          if (i > 0 && i % 8 === 7 && i < 39) randomDrills += " ";
+        
+        // Prevent consonant+vowel combination in Home Row preset
+        if (this.currentLang === 'ko' && (activePreset.name.includes("기본 자리") || activePreset.name.includes("Home Row"))) {
+          const consonants = "ㅁㄴㅇㄹㅎ;";
+          const vowels = "ㅗㅓㅏㅣ";
+          const blocks = [];
+          for (let b = 0; b < 8; b++) {
+            let block = "";
+            const source = (b % 2 === 0) ? consonants : vowels;
+            for (let i = 0; i < 4; i++) {
+              block += source[Math.floor(Math.random() * source.length)];
+            }
+            blocks.push(block);
+          }
+          randomDrills = blocks.join(" ");
+        } else {
+          // Standard random generator for other keys (Left Hand has only consonants, Right Hand has only vowels, so they don't combine)
+          for (let i = 0; i < 40; i++) {
+            randomDrills += keys[Math.floor(Math.random() * keys.length)];
+            if (i > 0 && i % 8 === 7 && i < 39) randomDrills += " ";
+          }
         }
         this.targetSentences = [randomDrills];
         this.currentSentenceIndex = 0;
