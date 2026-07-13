@@ -74,6 +74,28 @@ function decomposeHangul(char) {
   return result;
 }
 
+// Check if user's composing character is a valid prefix of the target character (Hangul only)
+function isValidHangulPrefix(typedChar, targetChar) {
+  if (!typedChar || !targetChar) return false;
+  if (typedChar === targetChar) return true;
+  
+  const typedJamos = decomposeHangul(typedChar);
+  const targetJamos = decomposeHangul(targetChar);
+  
+  // If target is not Hangul or typed is not Hangul, direct comparison
+  if (typedJamos.length === 1 && targetJamos.length === 1) {
+    return typedChar === targetChar;
+  }
+  
+  // If typed has more strokes than target, it's not a prefix
+  if (typedJamos.length > targetJamos.length) return false;
+  
+  for (let i = 0; i < typedJamos.length; i++) {
+    if (typedJamos[i] !== targetJamos[i]) return false;
+  }
+  return true;
+}
+
 // Preset Materials
 const PRESETS = {
   ko: {
@@ -617,7 +639,18 @@ class TypingApp {
             let block = "";
             const source = (b % 2 === 0) ? consonants : vowels;
             for (let i = 0; i < 4; i++) {
-              block += source[Math.floor(Math.random() * source.length)];
+              let char = "";
+              do {
+                char = source[Math.floor(Math.random() * source.length)];
+              } while (
+                block.length > 0 && (
+                  (block[block.length - 1] === 'ㄴ' && char === 'ㅎ') ||
+                  (block[block.length - 1] === 'ㄹ' && char === 'ㅎ') ||
+                  (block[block.length - 1] === 'ㅗ' && char === 'ㅏ') ||
+                  (block[block.length - 1] === 'ㅗ' && char === 'ㅣ')
+                )
+              );
+              block += char;
             }
             blocks.push(block);
           }
@@ -711,6 +744,9 @@ class TypingApp {
       if (i < inputValue.length) {
         if (inputValue[i] === this.targetText[i]) {
           span.classList.add('char-correct');
+        } else if (i === inputValue.length - 1 && isValidHangulPrefix(inputValue[i], this.targetText[i])) {
+          // If in the middle of a valid Hangul composition, treat it as active current character and do not count as typo
+          span.classList.add('char-current');
         } else {
           span.classList.add('char-wrong');
           // Track incorrect typing keystroke
@@ -841,7 +877,7 @@ class TypingApp {
     let correctCount = 0;
     const currentInput = inputValue;
     for (let i = 0; i < currentInput.length; i++) {
-      if (currentInput[i] === this.targetText[i]) {
+      if (currentInput[i] === this.targetText[i] || (i === currentInput.length - 1 && isValidHangulPrefix(currentInput[i], this.targetText[i]))) {
         correctCount++;
       }
     }
