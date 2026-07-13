@@ -78,7 +78,8 @@ function decomposeHangul(char) {
 const PRESETS = {
   ko: {
     key: [
-      { name: "기본 자리 (Home Row)", data: "ㅁㄴㅇㄹㅎㅗㅓㅏㅣ;" },
+      { name: "기본 자리 - 자음", data: "ㅁㄴㅇㄹㅎ;" },
+      { name: "기본 자리 - 모음", data: "ㅗㅓㅏㅣ" },
       { name: "왼손 자리 (Left Hand)", data: "ㅂㅈㄷㄱㅅㅁㄴㅇㄹㅋㅌㅊㅍ" },
       { name: "오른손 자리 (Right Hand)", data: "ㅛㅕㅑㅐㅔㅗㅓㅏㅣㅠㅜㅡ" },
       { name: "숫자 및 기호", data: "1234567890-=[]\\;',./" }
@@ -629,6 +630,7 @@ class TypingApp {
     
     this.targetText = this.targetSentences[this.currentSentenceIndex] || "";
     this.targetCharCount = this.targetText.length;
+    this.elements.hiddenInput.maxLength = this.targetCharCount;
     
     this.renderTargetText();
     this.updateInputDisplay("");
@@ -706,7 +708,9 @@ class TypingApp {
 
     // Success condition: completed target text
     if (inputValue.length >= totalLength) {
-      this.completeSentence();
+      if (this.currentMode !== 'sentence' && this.currentMode !== 'custom') {
+        this.completeSentence();
+      }
     }
   }
 
@@ -773,6 +777,7 @@ class TypingApp {
         this.targetText = this.targetSentences[this.currentSentenceIndex];
         this.targetCharCount = this.targetText.length;
         this.elements.hiddenInput.value = "";
+        this.elements.hiddenInput.maxLength = this.targetCharCount;
         
         this.renderTargetText();
         this.updateInputDisplay("");
@@ -960,6 +965,14 @@ class TypingApp {
     // Play switch sounds
     if (e.key !== 'Process' && !['Shift', 'Control', 'Alt', 'CapsLock', 'Tab'].includes(e.key)) {
       playKeySound(this.soundType);
+    }
+
+    // Trigger completeSentence on Enter key for sentence/custom modes
+    if (e.key === 'Enter') {
+      if (this.currentMode === 'sentence' || this.currentMode === 'custom') {
+        e.preventDefault();
+        this.completeSentence();
+      }
     }
   }
 
